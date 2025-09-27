@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router'; // Add RouterModule here
 
 import { AuthService, User } from '../../../core/services/auth.service';
 
@@ -14,11 +14,13 @@ import { AuthService, User } from '../../../core/services/auth.service';
     CommonModule,
     MatToolbarModule,
     MatButtonModule,
-    MatCardModule
+    MatCardModule,
+    RouterModule  // Add this line
   ],
   template: `
     <mat-toolbar color="primary">
       <span>NexusBoard</span>
+      <button mat-button routerLink="/teams">Teams</button>
       <span class="spacer"></span>
       <span *ngIf="currentUser">Welcome, {{ currentUser.firstName }}!</span>
       <button mat-button (click)="logout()">Logout</button>
