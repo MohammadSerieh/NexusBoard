@@ -8,6 +8,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TeamsService, Team } from '../../../core/services/teams.service';
 import { CreateTeamDialogComponent } from '../create-team-dialog/create-team-dialog.component';
+import { AddMemberDialogComponent } from '../add-member-dialog/add-member-dialog.component';
 
 @Component({
   selector: 'app-teams-list',
@@ -43,17 +44,39 @@ import { CreateTeamDialogComponent } from '../create-team-dialog/create-team-dia
             <div class="team-stats">
               <span class="stat">
                 <mat-icon>people</mat-icon>
-                {{ team.memberCount }} members
+                {{ team.memberCount }} member{{ team.memberCount !== 1 ? 's' : '' }}
               </span>
               <span class="role-badge" [class]="getRoleClass(team.myRole)">
                 {{ getRoleName(team.myRole) }}
               </span>
             </div>
+            
+            <!-- Show team members preview -->
+            <div class="members-preview" *ngIf="team.members && team.members.length > 0">
+              <h4>Members:</h4>
+              <div class="member-chips">
+                <span class="member-chip" *ngFor="let member of team.members | slice:0:3">
+                  {{ member.firstName }} {{ member.lastName }}
+                  <span class="member-role">({{ getRoleName(member.role) }})</span>
+                </span>
+                <span class="more-members" *ngIf="team.memberCount > 3">
+                  +{{ team.memberCount - 3 }} more
+                </span>
+              </div>
+            </div>
           </mat-card-content>
           
           <mat-card-actions>
-            <button mat-button (click)="viewTeam(team.id)">View Details</button>
-            <button mat-button *ngIf="team.myRole === 1" (click)="addMember(team)">
+            <button mat-button (click)="viewTeam(team.id)">
+              <mat-icon>visibility</mat-icon>
+              View Details
+            </button>
+            <button 
+              mat-button 
+              *ngIf="team.myRole === 1" 
+              (click)="addMember(team)"
+              color="primary">
+              <mat-icon>person_add</mat-icon>
               Add Member
             </button>
           </mat-card-actions>
@@ -88,7 +111,7 @@ import { CreateTeamDialogComponent } from '../create-team-dialog/create-team-dia
 
     .teams-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
       gap: 20px;
     }
 
@@ -127,6 +150,43 @@ import { CreateTeamDialogComponent } from '../create-team-dialog/create-team-dia
       color: #7b1fa2;
     }
 
+    .members-preview {
+      margin-top: 16px;
+    }
+
+    .members-preview h4 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .member-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .member-chip {
+      background-color: #f5f5f5;
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-size: 12px;
+      color: #333;
+    }
+
+    .member-role {
+      color: #666;
+      font-weight: normal;
+    }
+
+    .more-members {
+      background-color: #e0e0e0;
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-size: 12px;
+      color: #666;
+    }
+
     .no-teams {
       text-align: center;
       padding: 60px 20px;
@@ -139,6 +199,10 @@ import { CreateTeamDialogComponent } from '../create-team-dialog/create-team-dia
       height: 64px;
       margin-bottom: 16px;
       color: #ccc;
+    }
+
+    mat-card-actions button {
+      margin-right: 8px;
     }
   `]
 })
@@ -173,7 +237,20 @@ export class TeamsListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadTeams(); // Reload teams after creation
+        this.loadTeams();
+      }
+    });
+  }
+
+  addMember(team: Team): void {
+    const dialogRef = this.dialog.open(AddMemberDialogComponent, {
+      width: '500px',
+      data: { team }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadTeams(); // Reload teams to show updated member count
       }
     });
   }
@@ -189,10 +266,5 @@ export class TeamsListComponent implements OnInit {
   viewTeam(teamId: string): void {
     // TODO: Navigate to team details
     console.log('View team:', teamId);
-  }
-
-  addMember(team: Team): void {
-    // TODO: Open add member dialog
-    console.log('Add member to team:', team.name);
   }
 }
