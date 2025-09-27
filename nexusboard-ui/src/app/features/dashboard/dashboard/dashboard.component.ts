@@ -21,6 +21,7 @@ import { AuthService, User } from '../../../core/services/auth.service';
     <mat-toolbar color="primary">
       <span>NexusBoard</span>
       <button mat-button routerLink="/teams">Teams</button>
+      <button mat-button routerLink="/projects">Projects</button>
       <span class="spacer"></span>
       <span *ngIf="currentUser">Welcome, {{ currentUser.firstName }}!</span>
       <button mat-button (click)="logout()">Logout</button>

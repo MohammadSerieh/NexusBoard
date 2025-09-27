@@ -1,0 +1,41 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.register-actions {
+  margin-top: 20px;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 16px;
+  
+  a {
+    color: #1976d2;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+mat-spinner {
+  margin-right: 8px;
+}

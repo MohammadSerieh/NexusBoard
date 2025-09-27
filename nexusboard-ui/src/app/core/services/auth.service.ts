@@ -40,7 +40,7 @@ export interface JwtPayload {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:5058/api';
+  private readonly API_URL = 'http://192.168.0.150:5058/api';
   private readonly TOKEN_KEY = 'auth_token';
   
   private currentUserSubject = new BehaviorSubject<User | null>(null);
