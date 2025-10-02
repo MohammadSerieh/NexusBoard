@@ -396,7 +396,7 @@ export class KanbanBoardComponent implements OnInit {
   }
 
   onTaskDrop(event: CdkDragDrop<WorkItem[]>): void {
-    if (event.previousContainer === event.container) {
+    if (event.previousContainer === event.container) { // Reorder within same column
       // Reorder within same column
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {

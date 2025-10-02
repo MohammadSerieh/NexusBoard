@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from '../../../environments/environment';
 
 export interface User {
   id: string;
@@ -40,7 +41,7 @@ export interface JwtPayload {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://192.168.0.150:5058/api';
+  private readonly API_URL = environment.apiUrl;
   private readonly TOKEN_KEY = 'auth_token';
   
   private currentUserSubject = new BehaviorSubject<User | null>(null);
