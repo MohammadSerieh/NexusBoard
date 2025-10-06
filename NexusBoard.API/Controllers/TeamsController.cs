@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexusBoard.Core.Entities;
 using NexusBoard.Infrastructure.Data;
+using NexusBoard.API.DTOs.Teams;
 using System.Security.Claims;
 
 namespace NexusBoard.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] // Require authentication for all endpoints
+[Authorize]
 public class TeamsController : ControllerBase
 {
     private readonly NexusBoardDbContext _context;
@@ -31,32 +32,33 @@ public class TeamsController : ControllerBase
             .Include(tm => tm.Team)
                 .ThenInclude(t => t.Members.Where(m => m.IsActive))
                 .ThenInclude(m => m.User)
-            .Select(tm => new
+            .Select(tm => new TeamResponse
             {
-                tm.Team.Id,
-                tm.Team.Name,
-                tm.Team.Description,
-                tm.Team.CreatedAt,
-                Creator = new
+                Id = tm.Team.Id,
+                Name = tm.Team.Name,
+                Description = tm.Team.Description,
+                CreatedAt = tm.Team.CreatedAt,
+                Creator = new TeamCreatorDto
                 {
-                    tm.Team.Creator.Id,
-                    tm.Team.Creator.FirstName,
-                    tm.Team.Creator.LastName,
-                    tm.Team.Creator.Email
+                    Id = tm.Team.Creator.Id,
+                    FirstName = tm.Team.Creator.FirstName,
+                    LastName = tm.Team.Creator.LastName,
+                    Email = tm.Team.Creator.Email
                 },
-                MyRole = tm.Role,
+                MyRole = tm.Role.ToString(),
                 MemberCount = tm.Team.Members.Count(m => m.IsActive),
                 Members = tm.Team.Members
                     .Where(m => m.IsActive)
-                    .Take(5) // Show first 5 members
-                    .Select(m => new
+                    .Take(5)
+                    .Select(m => new TeamMemberDto
                     {
-                        m.User.Id,
-                        m.User.FirstName,
-                        m.User.LastName,
-                        m.User.Email,
-                        Role = m.Role
+                        Id = m.User.Id,
+                        FirstName = m.User.FirstName,
+                        LastName = m.User.LastName,
+                        Email = m.User.Email,
+                        Role = m.Role.ToString()
                     })
+                    .ToList()
             })
             .ToListAsync();
 
@@ -94,18 +96,18 @@ public class TeamsController : ControllerBase
         var createdTeam = await _context.Teams
             .Where(t => t.Id == team.Id)
             .Include(t => t.Creator)
-            .Select(t => new
+            .Select(t => new CreateTeamResponse
             {
-                t.Id,
-                t.Name,
-                t.Description,
-                t.CreatedAt,
-                Creator = new
+                Id = t.Id,
+                Name = t.Name,
+                Description = t.Description,
+                CreatedAt = t.CreatedAt,
+                Creator = new TeamCreatorDto
                 {
-                    t.Creator.Id,
-                    t.Creator.FirstName,
-                    t.Creator.LastName,
-                    t.Creator.Email
+                    Id = t.Creator.Id,
+                    FirstName = t.Creator.FirstName,
+                    LastName = t.Creator.LastName,
+                    Email = t.Creator.Email
                 },
                 MemberCount = 1
             })
@@ -171,15 +173,17 @@ public class TeamsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        return Ok(new
+        var response = new AddMemberResponse
         {
-            userToAdd.Id,
-            userToAdd.FirstName,
-            userToAdd.LastName,
-            userToAdd.Email,
-            Role = TeamRole.Member,
+            Id = userToAdd.Id,
+            FirstName = userToAdd.FirstName,
+            LastName = userToAdd.LastName,
+            Email = userToAdd.Email,
+            Role = TeamRole.Member.ToString(),
             JoinedAt = DateTime.UtcNow
-        });
+        };
+
+        return Ok(response);
     }
 
     private Guid GetCurrentUserId()
@@ -187,15 +191,4 @@ public class TeamsController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.Parse(userIdClaim ?? throw new UnauthorizedAccessException());
     }
-}
-
-public class CreateTeamRequest
-{
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-}
-
-public class AddTeamMemberRequest
-{
-    public string Email { get; set; } = string.Empty;
 }

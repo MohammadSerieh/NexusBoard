@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexusBoard.Core.Entities;
 using NexusBoard.Infrastructure.Data;
+using NexusBoard.API.DTOs.Projects;
 using System.Security.Claims;
 
 namespace NexusBoard.API.Controllers;
@@ -24,7 +25,6 @@ public class ProjectsController : ControllerBase
     {
         var userId = GetCurrentUserId();
         
-        // Get projects from teams where user is a member
         var projects = await _context.Projects
             .Where(p => p.IsActive && 
                        _context.TeamMembers.Any(tm => tm.TeamId == p.TeamId && 
@@ -33,28 +33,28 @@ public class ProjectsController : ControllerBase
             .Include(p => p.Team)
             .Include(p => p.Creator)
             .Include(p => p.Tasks.Where(t => t.IsActive))
-            .Select(p => new
+            .Select(p => new ProjectListResponse
             {
-                p.Id,
-                p.Name,
-                p.Description,
-                p.Status,
-                p.Priority,
-                p.StartDate,
-                p.EndDate,
-                p.CreatedAt,
-                Team = new
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Status = p.Status,
+                Priority = p.Priority,
+                StartDate = p.StartDate,
+                EndDate = p.EndDate,
+                CreatedAt = p.CreatedAt,
+                Team = new ProjectTeamDto
                 {
-                    p.Team.Id,
-                    p.Team.Name
+                    Id = p.Team.Id,
+                    Name = p.Team.Name
                 },
-                Creator = new
+                Creator = new ProjectCreatorDto
                 {
-                    p.Creator.Id,
-                    p.Creator.FirstName,
-                    p.Creator.LastName
+                    Id = p.Creator.Id,
+                    FirstName = p.Creator.FirstName,
+                    LastName = p.Creator.LastName
                 },
-                TaskCounts = new
+                TaskCounts = new TaskCountsDto
                 {
                     Total = p.Tasks.Count(t => t.IsActive),
                     Todo = p.Tasks.Count(t => t.IsActive && t.Status == WorkItemStatus.Todo),
@@ -85,59 +85,61 @@ public class ProjectsController : ControllerBase
             .Include(p => p.Creator)
             .Include(p => p.Tasks.Where(t => t.IsActive))
                 .ThenInclude(t => t.Assignee)
-            .Select(p => new
+            .Select(p => new ProjectDetailResponse
             {
-                p.Id,
-                p.Name,
-                p.Description,
-                p.Status,
-                p.Priority,
-                p.StartDate,
-                p.EndDate,
-                p.CreatedAt,
-                Team = new
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Status = p.Status,
+                Priority = p.Priority,
+                StartDate = p.StartDate,
+                EndDate = p.EndDate,
+                CreatedAt = p.CreatedAt,
+                Team = new ProjectTeamDetailDto
                 {
-                    p.Team.Id,
-                    p.Team.Name,
-                    p.Team.Description,
+                    Id = p.Team.Id,
+                    Name = p.Team.Name,
+                    Description = p.Team.Description,
                     Members = p.Team.Members
                         .Where(m => m.IsActive)
-                        .Select(m => new
+                        .Select(m => new ProjectTeamMemberDto
                         {
-                            m.User.Id,
-                            m.User.FirstName,
-                            m.User.LastName,
-                            m.User.Email,
-                            Role = m.Role
+                            Id = m.User.Id,
+                            FirstName = m.User.FirstName,
+                            LastName = m.User.LastName,
+                            Email = m.User.Email,
+                            Role = m.Role.ToString()
                         })
+                        .ToList()
                 },
-                Creator = new
+                Creator = new ProjectCreatorDetailDto
                 {
-                    p.Creator.Id,
-                    p.Creator.FirstName,
-                    p.Creator.LastName,
-                    p.Creator.Email
+                    Id = p.Creator.Id,
+                    FirstName = p.Creator.FirstName,
+                    LastName = p.Creator.LastName,
+                    Email = p.Creator.Email
                 },
                 Tasks = p.Tasks
                     .Where(t => t.IsActive)
-                    .Select(t => new
+                    .Select(t => new ProjectTaskDto
                     {
-                        t.Id,
-                        t.Title,
-                        t.Description,
-                        t.Status,
-                        t.Priority,
-                        t.DueDate,
-                        t.CreatedAt,
-                        Assignee = t.Assignee != null ? new
+                        Id = t.Id,
+                        Title = t.Title,
+                        Description = t.Description,
+                        Status = t.Status,
+                        Priority = t.Priority,
+                        DueDate = t.DueDate,
+                        CreatedAt = t.CreatedAt,
+                        Assignee = t.Assignee != null ? new ProjectTaskAssigneeDto
                         {
-                            t.Assignee.Id,
-                            t.Assignee.FirstName,
-                            t.Assignee.LastName
+                            Id = t.Assignee.Id,
+                            FirstName = t.Assignee.FirstName,
+                            LastName = t.Assignee.LastName
                         } : null
                     })
                     .OrderBy(t => t.Status)
                     .ThenByDescending(t => t.Priority)
+                    .ToList()
             })
             .FirstOrDefaultAsync();
 
@@ -184,26 +186,26 @@ public class ProjectsController : ControllerBase
             .Where(p => p.Id == project.Id)
             .Include(p => p.Team)
             .Include(p => p.Creator)
-            .Select(p => new
+            .Select(p => new CreateProjectResponse
             {
-                p.Id,
-                p.Name,
-                p.Description,
-                p.Status,
-                p.Priority,
-                p.StartDate,
-                p.EndDate,
-                p.CreatedAt,
-                Team = new
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Status = p.Status,
+                Priority = p.Priority,
+                StartDate = p.StartDate,
+                EndDate = p.EndDate,
+                CreatedAt = p.CreatedAt,
+                Team = new ProjectTeamDto
                 {
-                    p.Team.Id,
-                    p.Team.Name
+                    Id = p.Team.Id,
+                    Name = p.Team.Name
                 },
-                Creator = new
+                Creator = new ProjectCreatorDto
                 {
-                    p.Creator.Id,
-                    p.Creator.FirstName,
-                    p.Creator.LastName
+                    Id = p.Creator.Id,
+                    FirstName = p.Creator.FirstName,
+                    LastName = p.Creator.LastName
                 }
             })
             .FirstOrDefaultAsync();
@@ -272,25 +274,4 @@ public class ProjectsController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.Parse(userIdClaim ?? throw new UnauthorizedAccessException());
     }
-}
-
-public class CreateProjectRequest
-{
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public Guid TeamId { get; set; }
-    public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
-    public ProjectPriority Priority { get; set; } = ProjectPriority.Medium;
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
-}
-
-public class UpdateProjectRequest
-{
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public ProjectStatus Status { get; set; }
-    public ProjectPriority Priority { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
 }

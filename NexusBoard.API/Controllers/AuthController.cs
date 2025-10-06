@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NexusBoard.Core.Entities;
 using NexusBoard.Infrastructure.Data;
+using NexusBoard.API.DTOs.Auth;
 using BCrypt.Net;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -47,18 +48,20 @@ public class AuthController : ControllerBase
 
         var token = GenerateJwtToken(user);
 
-        return Ok(new
+        var response = new AuthResponse
         {
-            token,
-            user = new
+            Token = token,
+            User = new UserDto
             {
-                user.Id,
-                user.Email,
-                user.FirstName,
-                user.LastName,
-                user.Role
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role.ToString()
             }
-        });
+        };
+
+        return Ok(response);
     }
 
     [HttpPost("login")]
@@ -78,18 +81,20 @@ public class AuthController : ControllerBase
 
         var token = GenerateJwtToken(user);
 
-        return Ok(new
+        var response = new AuthResponse
         {
-            token,
-            user = new
+            Token = token,
+            User = new UserDto
             {
-                user.Id,
-                user.Email,
-                user.FirstName,
-                user.LastName,
-                user.Role
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role.ToString()
             }
-        });
+        };
+
+        return Ok(response);
     }
 
     private string GenerateJwtToken(User user)
@@ -115,18 +120,4 @@ public class AuthController : ControllerBase
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
-}
-
-public class RegisterRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-}
-
-public class LoginRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
 }

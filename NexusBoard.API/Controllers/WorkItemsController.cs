@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexusBoard.Core.Entities;
 using NexusBoard.Infrastructure.Data;
+using NexusBoard.API.DTOs.WorkItems;
 using System.Security.Claims;
 
 namespace NexusBoard.API.Controllers;
@@ -40,28 +41,28 @@ public class WorkItemsController : ControllerBase
             .Where(wi => wi.ProjectId == projectId && wi.IsActive)
             .Include(wi => wi.Assignee)
             .Include(wi => wi.Creator)
-            .Select(wi => new
+            .Select(wi => new WorkItemListResponse
             {
-                wi.Id,
-                wi.Title,
-                wi.Description,
-                wi.Status,
-                wi.Priority,
-                wi.DueDate,
-                wi.CreatedAt,
-                wi.CompletedAt,
-                Assignee = wi.Assignee != null ? new
+                Id = wi.Id,
+                Title = wi.Title,
+                Description = wi.Description,
+                Status = wi.Status,
+                Priority = wi.Priority,
+                DueDate = wi.DueDate,
+                CreatedAt = wi.CreatedAt,
+                CompletedAt = wi.CompletedAt,
+                Assignee = wi.Assignee != null ? new WorkItemAssigneeDto
                 {
-                    wi.Assignee.Id,
-                    wi.Assignee.FirstName,
-                    wi.Assignee.LastName,
-                    wi.Assignee.Email
+                    Id = wi.Assignee.Id,
+                    FirstName = wi.Assignee.FirstName,
+                    LastName = wi.Assignee.LastName,
+                    Email = wi.Assignee.Email
                 } : null,
-                Creator = new
+                Creator = new WorkItemCreatorDto
                 {
-                    wi.Creator.Id,
-                    wi.Creator.FirstName,
-                    wi.Creator.LastName
+                    Id = wi.Creator.Id,
+                    FirstName = wi.Creator.FirstName,
+                    LastName = wi.Creator.LastName
                 },
                 FileCount = wi.Files.Count(f => f.IsActive)
             })
@@ -88,50 +89,51 @@ public class WorkItemsController : ControllerBase
             .Include(wi => wi.Assignee)
             .Include(wi => wi.Creator)
             .Include(wi => wi.Files.Where(f => f.IsActive))
-            .Select(wi => new
+            .Select(wi => new WorkItemDetailResponse
             {
-                wi.Id,
-                wi.Title,
-                wi.Description,
-                wi.Status,
-                wi.Priority,
-                wi.DueDate,
-                wi.CreatedAt,
-                wi.CompletedAt,
-                Project = new
+                Id = wi.Id,
+                Title = wi.Title,
+                Description = wi.Description,
+                Status = wi.Status,
+                Priority = wi.Priority,
+                DueDate = wi.DueDate,
+                CreatedAt = wi.CreatedAt,
+                CompletedAt = wi.CompletedAt,
+                Project = new WorkItemProjectDto
                 {
-                    wi.Project.Id,
-                    wi.Project.Name,
-                    Team = new
+                    Id = wi.Project.Id,
+                    Name = wi.Project.Name,
+                    Team = new WorkItemTeamDto
                     {
-                        wi.Project.Team.Id,
-                        wi.Project.Team.Name
+                        Id = wi.Project.Team.Id,
+                        Name = wi.Project.Team.Name
                     }
                 },
-                Assignee = wi.Assignee != null ? new
+                Assignee = wi.Assignee != null ? new WorkItemAssigneeDto
                 {
-                    wi.Assignee.Id,
-                    wi.Assignee.FirstName,
-                    wi.Assignee.LastName,
-                    wi.Assignee.Email
+                    Id = wi.Assignee.Id,
+                    FirstName = wi.Assignee.FirstName,
+                    LastName = wi.Assignee.LastName,
+                    Email = wi.Assignee.Email
                 } : null,
-                Creator = new
+                Creator = new WorkItemCreatorDetailDto
                 {
-                    wi.Creator.Id,
-                    wi.Creator.FirstName,
-                    wi.Creator.LastName,
-                    wi.Creator.Email
+                    Id = wi.Creator.Id,
+                    FirstName = wi.Creator.FirstName,
+                    LastName = wi.Creator.LastName,
+                    Email = wi.Creator.Email
                 },
                 Files = wi.Files
                     .Where(f => f.IsActive)
-                    .Select(f => new
+                    .Select(f => new WorkItemFileDto
                     {
-                        f.Id,
-                        f.OriginalFileName,
-                        f.FileSizeBytes,
-                        f.ContentType,
-                        f.UploadedAt
+                        Id = f.Id,
+                        OriginalFileName = f.OriginalFileName,
+                        FileSizeBytes = f.FileSizeBytes,
+                        ContentType = f.ContentType,
+                        UploadedAt = f.UploadedAt
                     })
+                    .ToList()
             })
             .FirstOrDefaultAsync();
 
@@ -195,31 +197,31 @@ public class WorkItemsController : ControllerBase
             .Include(wi => wi.Assignee)
             .Include(wi => wi.Creator)
             .Include(wi => wi.Project)
-            .Select(wi => new
+            .Select(wi => new CreateWorkItemResponse
             {
-                wi.Id,
-                wi.Title,
-                wi.Description,
-                wi.Status,
-                wi.Priority,
-                wi.DueDate,
-                wi.CreatedAt,
-                Project = new
+                Id = wi.Id,
+                Title = wi.Title,
+                Description = wi.Description,
+                Status = wi.Status,
+                Priority = wi.Priority,
+                DueDate = wi.DueDate,
+                CreatedAt = wi.CreatedAt,
+                Project = new WorkItemProjectSimpleDto
                 {
-                    wi.Project.Id,
-                    wi.Project.Name
+                    Id = wi.Project.Id,
+                    Name = wi.Project.Name
                 },
-                Assignee = wi.Assignee != null ? new
+                Assignee = wi.Assignee != null ? new WorkItemAssigneeSimpleDto
                 {
-                    wi.Assignee.Id,
-                    wi.Assignee.FirstName,
-                    wi.Assignee.LastName
+                    Id = wi.Assignee.Id,
+                    FirstName = wi.Assignee.FirstName,
+                    LastName = wi.Assignee.LastName
                 } : null,
-                Creator = new
+                Creator = new WorkItemCreatorDto
                 {
-                    wi.Creator.Id,
-                    wi.Creator.FirstName,
-                    wi.Creator.LastName
+                    Id = wi.Creator.Id,
+                    FirstName = wi.Creator.FirstName,
+                    LastName = wi.Creator.LastName
                 }
             })
             .FirstOrDefaultAsync();
@@ -313,25 +315,4 @@ public class WorkItemsController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.Parse(userIdClaim ?? throw new UnauthorizedAccessException());
     }
-}
-
-public class CreateWorkItemRequest
-{
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public Guid ProjectId { get; set; }
-    public Guid? AssigneeId { get; set; }
-    public WorkItemStatus Status { get; set; } = WorkItemStatus.Todo;
-    public WorkItemPriority Priority { get; set; } = WorkItemPriority.Medium;
-    public DateTime? DueDate { get; set; }
-}
-
-public class UpdateWorkItemRequest
-{
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public WorkItemStatus Status { get; set; }
-    public WorkItemPriority Priority { get; set; }
-    public Guid? AssigneeId { get; set; }
-    public DateTime? DueDate { get; set; }
 }
