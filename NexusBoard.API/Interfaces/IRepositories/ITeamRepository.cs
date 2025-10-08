@@ -12,4 +12,5 @@ public interface ITeamRepository
     Task<User?> GetUserByEmailAsync(string email);
     Task<TeamMember?> GetTeamMemberAsync(Guid teamId, Guid userId);
     Task UpdateTeamMemberAsync(TeamMember teamMember);
+    Task DeleteTeamAsync(Guid teamId);
 }

@@ -52,9 +52,9 @@ public class TeamRepository : ITeamRepository
     public async Task<bool> IsUserTeamLeadAsync(Guid userId, Guid teamId)
     {
         return await _context.TeamMembers
-            .AnyAsync(tm => tm.TeamId == teamId && 
-                           tm.UserId == userId && 
-                           tm.Role == TeamRole.TeamLead && 
+            .AnyAsync(tm => tm.TeamId == teamId &&
+                           tm.UserId == userId &&
+                           tm.Role == TeamRole.TeamLead &&
                            tm.IsActive);
     }
 
@@ -73,6 +73,29 @@ public class TeamRepository : ITeamRepository
     public async Task UpdateTeamMemberAsync(TeamMember teamMember)
     {
         _context.TeamMembers.Update(teamMember);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteTeamAsync(Guid teamId)
+    {
+        var team = await _context.Teams
+            .Include(t => t.Members)
+            .FirstOrDefaultAsync(t => t.Id == teamId);
+
+        if (team == null)
+        {
+            throw new InvalidOperationException("Team not found");
+        }
+
+        // Soft delete all team members
+        foreach (var member in team.Members)
+        {
+            member.IsActive = false;
+        }
+
+        // Soft delete the team
+        team.IsActive = false;
+        
         await _context.SaveChangesAsync();
     }
 }

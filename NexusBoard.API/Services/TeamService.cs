@@ -189,6 +189,15 @@ public class TeamService : ITeamService
         await _teamRepository.UpdateTeamMemberAsync(teamMember);
 
     }
+
+    public async Task DeleteTeamAsync(Guid teamId, Guid userId)
+    {
+        if (!await _teamRepository.IsUserTeamLeadAsync(userId, teamId))
+        {
+            throw new UnauthorizedAccessException("Only team leads can delete teams");
+        }
+        await _teamRepository.DeleteTeamAsync(teamId);
+    }
     
     
 }

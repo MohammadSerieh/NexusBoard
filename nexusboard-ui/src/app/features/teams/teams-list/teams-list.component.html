@@ -56,6 +56,14 @@
           <mat-icon>person_add</mat-icon>
           Add Member
         </button>
+        <button 
+          mat-button 
+          *ngIf="team.myRole === 'TeamLead'" 
+          (click)="deleteTeam(team)"
+          color="warn">
+          <mat-icon>delete</mat-icon>
+          Delete Team
+        </button>
       </mat-card-actions>
     </mat-card>
   </div>

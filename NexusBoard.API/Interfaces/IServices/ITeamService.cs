@@ -8,4 +8,5 @@ public interface ITeamService
     Task<CreateTeamResponse> CreateTeamAsync(CreateTeamRequest request, Guid userId);
     Task<AddMemberResponse> AddTeamMemberAsync(Guid teamId, AddTeamMemberRequest request, Guid userId);
     Task RemoveTeamMemberAsync(Guid teamId, Guid memberId, Guid userId); // No data returned just success/failure
+    Task DeleteTeamAsync(Guid teamId, Guid userId);
 }

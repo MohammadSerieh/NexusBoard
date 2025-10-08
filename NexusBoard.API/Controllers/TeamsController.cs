@@ -72,6 +72,26 @@ public class TeamsController : ControllerBase
         }
     }
 
+    [HttpDelete("{teamId}")]
+    public async Task<IActionResult> DeleteTeam(Guid teamId)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            await _teamService.DeleteTeamAsync(teamId, userId);
+            return Ok(new { message = "Team deleted successfuly" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        
+    }
+
     private Guid GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

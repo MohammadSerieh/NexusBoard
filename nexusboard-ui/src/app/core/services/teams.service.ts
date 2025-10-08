@@ -72,4 +72,8 @@ export class TeamsService {
   isTeamLead(role: string): boolean {
     return role === 'TeamLead';
   }
-}
+
+  deleteTeam(teamId: string): Observable<any> {
+    return this.http.delete(`${this.API_URL}/teams/${teamId}`);
+  }
+} 

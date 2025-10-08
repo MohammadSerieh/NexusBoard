@@ -112,4 +112,23 @@ export class TeamsListComponent implements OnInit {
       }
     });
   }
+
+  deleteTeam(team: Team): void {
+    const confirmMessage = `Are you sure you want to delete "${team.name}"? This will remove all members and cannot be undone.`;
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    this.teamsService.deleteTeam(team.id).subscribe({
+      next: () => {
+        this.snackBar.open(`Team "${team.name}" deleted successfully!`, 'Close', { duration: 3000 });
+        this.loadTeams();
+      },
+      error: (error) => {
+        const message = error.error?.message || 'Failed to delete team';
+        this.snackBar.open(message, 'Close', { duration: 5000 });
+      }
+    });
+  }
 }
