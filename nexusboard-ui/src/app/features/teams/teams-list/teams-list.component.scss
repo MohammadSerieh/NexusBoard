@@ -1,0 +1,108 @@
+.teams-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.team-card {
+  height: fit-content;
+}
+
+.team-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #666;
+}
+
+.role-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.team-lead {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.member {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.members-preview {
+  margin-top: 16px;
+
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #666;
+  }
+}
+
+.member-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.member-chip {
+  background-color: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #333;
+}
+
+.member-role {
+  color: #666;
+  font-weight: normal;
+}
+
+.more-members {
+  background-color: #e0e0e0;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #666;
+}
+
+.no-teams {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.large-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  color: #ccc;
+}
+
+mat-card-actions button {
+  margin-right: 8px;
+}

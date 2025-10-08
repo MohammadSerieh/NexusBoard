@@ -1,0 +1,67 @@
+<h2 mat-dialog-title>
+  {{ data.team.name }} - Team Members
+</h2>
+
+<mat-dialog-content>
+  <div class="team-info">
+    <p><strong>Description:</strong> {{ data.team.description }}</p>
+    <p><strong>Created by:</strong> {{ data.team.creator.firstName }} {{ data.team.creator.lastName }}</p>
+    <p><strong>Total Members:</strong> {{ data.team.members.length }}</p>
+  </div>
+
+  <div class="members-section">
+    <h3>Members</h3>
+    
+    <table mat-table [dataSource]="data.team.members" class="members-table">
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let member">
+          {{ member.firstName }} {{ member.lastName }}
+        </td>
+      </ng-container>
+
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>Email</th>
+        <td mat-cell *matCellDef="let member">{{ member.email }}</td>
+      </ng-container>
+
+      <!-- Role Column -->
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef>Role</th>
+        <td mat-cell *matCellDef="let member">
+          <span [class]="getRoleClass(member.role)">
+            {{ getRoleName(member.role) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let member">
+          <button 
+            mat-icon-button 
+            color="warn"
+            *ngIf="canRemoveMember(member)"
+            (click)="removeMember(member)"
+            [disabled]="isRemoving"
+            matTooltip="Remove member from team">
+            <mat-icon>delete</mat-icon>
+          </button>
+          <span *ngIf="!canRemoveMember(member)" class="cannot-remove">
+            <mat-icon matTooltip="Cannot remove this member">block</mat-icon>
+          </span>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">Close</button>
+</mat-dialog-actions>

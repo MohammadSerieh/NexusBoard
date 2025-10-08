@@ -53,6 +53,25 @@ public class TeamsController : ControllerBase
         }
     }
 
+    [HttpDelete("{teamId}/members/{memberId}")]
+    public async Task<IActionResult> RemoveTeamMember(Guid teamId, Guid memberId)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            await _teamService.RemoveTeamMemberAsync(teamId, memberId, userId);
+            return Ok(new { message = "Member removed successfully" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     private Guid GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

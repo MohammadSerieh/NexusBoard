@@ -100,8 +100,8 @@ public class TeamService : ITeamService
     }
 
     public async Task<AddMemberResponse> AddTeamMemberAsync(
-        Guid teamId, 
-        AddTeamMemberRequest request, 
+        Guid teamId,
+        AddTeamMemberRequest request,
         Guid userId)
     {
         // Check if current user is team lead
@@ -159,4 +159,36 @@ public class TeamService : ITeamService
             JoinedAt = DateTime.UtcNow
         };
     }
+
+    public async Task RemoveTeamMemberAsync(Guid teamId, Guid memberId, Guid userId)
+    {
+        if (!await _teamRepository.IsUserTeamLeadAsync(userId, teamId))
+        {
+            throw new UnauthorizedAccessException("Only team leads can remove members");
+        }
+
+        // Prevent team lead from remving themselves
+        if (memberId == userId)
+        {
+            throw new InvalidProgramException("Team leads cannot remove themselves from the team");
+        }
+
+        var teamMember = await _teamRepository.GetTeamMemberAsync(teamId, memberId);
+
+        if (teamMember == null || !teamMember.IsActive)
+        {
+            throw new InvalidOperationException("Team member not found");
+        }
+
+        if (teamMember.Role == TeamRole.TeamLead)
+        {
+            throw new InvalidOperationException("Cannot remove a team lead");
+        }
+
+        teamMember.IsActive = false;
+        await _teamRepository.UpdateTeamMemberAsync(teamMember);
+
+    }
+    
+    
 }

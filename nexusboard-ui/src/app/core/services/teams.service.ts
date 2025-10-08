@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 
 export interface Team {
   id: string;
@@ -14,7 +13,7 @@ export interface Team {
     lastName: string;
     email: string;
   };
-  myRole: number;
+  myRole: string;
   memberCount: number;
   members: TeamMember[];
 }
@@ -24,7 +23,7 @@ export interface TeamMember {
   firstName: string;
   lastName: string;
   email: string;
-  role: number;
+  role: string;
 }
 
 export interface CreateTeamRequest {
@@ -40,7 +39,8 @@ export interface AddMemberRequest {
   providedIn: 'root'
 })
 export class TeamsService {
-  private readonly API_URL = environment.apiUrl;
+  private readonly API_URL = 'http://localhost:5058/api';
+
   constructor(private http: HttpClient) { }
 
   getMyTeams(): Observable<Team[]> {
@@ -55,11 +55,21 @@ export class TeamsService {
     return this.http.post<TeamMember>(`${this.API_URL}/teams/${teamId}/members`, request);
   }
 
-  getRoleName(role: number): string {
-    switch (role) {
-      case 1: return 'Team Lead';
-      case 2: return 'Member';
-      default: return 'Unknown';
+  removeTeamMember(teamId: string, memberId: string): Observable<any> {
+    return this.http.delete(`${this.API_URL}/teams/${teamId}/members/${memberId}`);
+  }
+
+  getRoleName(role: string): string {
+    if (role === 'TeamLead') {
+      return 'Team Lead';
     }
+    if (role === 'Member') {
+      return 'Member';
+    }
+    return 'Unknown';
+  }
+
+  isTeamLead(role: string): boolean {
+    return role === 'TeamLead';
   }
 }
