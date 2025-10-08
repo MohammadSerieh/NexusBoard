@@ -69,6 +69,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// Register Application Services
+builder.Services.AddScoped<NexusBoard.API.Interfaces.IServices.IAuthService, NexusBoard.API.Services.AuthService>();
+builder.Services.AddScoped<NexusBoard.API.Interfaces.IServices.ITeamService, NexusBoard.API.Services.TeamService>();
+builder.Services.AddScoped<NexusBoard.API.Interfaces.IServices.IProjectService, NexusBoard.API.Services.ProjectService>();
+builder.Services.AddScoped<NexusBoard.API.Interfaces.IServices.IWorkItemService, NexusBoard.API.Services.WorkItemService>();
+
+// Register Repositories
+builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.IAuthRepository, NexusBoard.API.Repositories.AuthRepository>();
+builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.ITeamRepository, NexusBoard.API.Repositories.TeamRepository>();
+builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.IProjectRepository, NexusBoard.API.Repositories.ProjectRepository>();
+builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.IWorkItemRepository, NexusBoard.API.Repositories.WorkItemRepository>();
+
 // Configure CORS for Angular app
 builder.Services.AddCors(options =>
 {
