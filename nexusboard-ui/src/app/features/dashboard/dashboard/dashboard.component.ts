@@ -1,69 +1,55 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { Router, RouterModule } from '@angular/router'; // Add RouterModule here
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatButtonModule } from '@angular/material/button';
+import { Router, RouterModule } from '@angular/router';
 
 import { AuthService, User } from '../../../core/services/auth.service';
+import { TeamsService, Team } from '../../../core/services/teams.service';
+import { ProjectsService, Project } from '../../../core/services/projects.service';
+
+interface DashboardStats {
+  totalTeams: number;
+  totalProjects: number;
+  totalTasks: number;
+  completedTasks: number;
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    MatToolbarModule,
-    MatButtonModule,
     MatCardModule,
-    RouterModule  // Add this line
+    MatIconModule,
+    MatProgressBarModule,
+    MatChipsModule,
+    MatButtonModule,
+    RouterModule
   ],
-  template: `
-    <mat-toolbar color="primary">
-      <span>NexusBoard</span>
-      <button mat-button routerLink="/teams">Teams</button>
-      <button mat-button routerLink="/projects">Projects</button>
-      <span class="spacer"></span>
-      <span *ngIf="currentUser">Welcome, {{ currentUser.firstName }}!</span>
-      <button mat-button (click)="logout()">Logout</button>
-    </mat-toolbar>
-
-    <div class="dashboard-container">
-      <mat-card class="welcome-card">
-        <mat-card-header>
-          <mat-card-title>Dashboard</mat-card-title>
-          <mat-card-subtitle>Welcome to NexusBoard</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <div *ngIf="currentUser">
-            <p><strong>Name:</strong> {{ currentUser.firstName }} {{ currentUser.lastName }}</p>
-            <p><strong>Email:</strong> {{ currentUser.email }}</p>
-            <p><strong>Role:</strong> {{ getRoleName(currentUser.role) }}</p>
-          </div>
-          <p>Your teams and projects will appear here soon!</p>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
-  styles: [`
-    .spacer {
-      flex: 1 1 auto;
-    }
-    
-    .dashboard-container {
-      padding: 20px;
-    }
-    
-    .welcome-card {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-  `]
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   currentUser: User | null = null;
+  stats: DashboardStats = {
+    totalTeams: 0,
+    totalProjects: 0,
+    totalTasks: 0,
+    completedTasks: 0
+  };
+  
+  recentProjects: Project[] = [];
+  teams: Team[] = [];
+  isLoading = true;
 
   constructor(
     private authService: AuthService,
+    private teamsService: TeamsService,
+    private projectsService: ProjectsService,
     private router: Router
   ) {}
 
@@ -72,21 +58,85 @@ export class DashboardComponent implements OnInit {
       this.currentUser = user;
       if (!user) {
         this.router.navigate(['/login']);
+      } else {
+        this.loadDashboardData();
       }
     });
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  loadDashboardData(): void {
+    this.isLoading = true;
+
+    // Load teams
+    this.teamsService.getMyTeams().subscribe({
+      next: (teams) => {
+        this.teams = teams;
+        this.stats.totalTeams = teams.length;
+        
+        // Load projects after teams
+        this.loadProjects();
+      },
+      error: (error) => {
+        console.error('Failed to load teams:', error);
+        this.isLoading = false;
+      }
+    });
   }
 
-  getRoleName(role: number): string {
-    switch (role) {
-      case 1: return 'Admin';
-      case 2: return 'Manager';
-      case 3: return 'Member';
-      default: return 'Unknown';
-    }
+  loadProjects(): void {
+    this.projectsService.getMyProjects().subscribe({
+      next: (projects) => {
+        this.recentProjects = projects.slice(0, 3); // Get 3 most recent
+        this.stats.totalProjects = projects.length;
+        
+        // Calculate total tasks across all projects
+        this.stats.totalTasks = projects.reduce((sum, p) => sum + p.taskCounts.total, 0);
+        this.stats.completedTasks = projects.reduce((sum, p) => sum + p.taskCounts.done, 0);
+        
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Failed to load projects:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  getCompletionPercentage(): number {
+    if (this.stats.totalTasks === 0) return 0;
+    return Math.round((this.stats.completedTasks / this.stats.totalTasks) * 100);
+  }
+
+  getProjectProgress(project: Project): number {
+    if (project.taskCounts.total === 0) return 0;
+    return Math.round((project.taskCounts.done / project.taskCounts.total) * 100);
+  }
+
+  navigateToProjects(): void {
+    this.router.navigate(['/projects']);
+  }
+
+  navigateToTeams(): void {
+    this.router.navigate(['/teams']);
+  }
+
+  navigateToProject(projectId: string): void {
+    this.router.navigate(['/projects', projectId, 'tasks']);
+  }
+
+  getStatusColor(status: number): string {
+    return this.projectsService.getStatusColor(status);
+  }
+
+  getStatusName(status: number): string {
+    return this.projectsService.getStatusName(status);
+  }
+
+  getPriorityColor(priority: number): string {
+    return this.projectsService.getPriorityColor(priority);
+  }
+
+  getPriorityName(priority: number): string {
+    return this.projectsService.getPriorityName(priority);
   }
 }

@@ -1,1 +1,137 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  <!-- Welcome Header -->
+  <div class="welcome-section">
+    <h1>Welcome back, {{ currentUser?.firstName }}! 👋</h1>
+    <p class="subtitle">Here's what's happening with your projects today.</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <p>Loading your dashboard...</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div *ngIf="!isLoading" class="stats-grid">
+    <mat-card class="stat-card teams-card">
+      <mat-icon class="stat-icon">groups</mat-icon>
+      <div class="stat-content">
+        <h2>{{ stats.totalTeams }}</h2>
+        <p>Teams</p>
+      </div>
+      <button mat-icon-button (click)="navigateToTeams()" class="stat-action">
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </mat-card>
+
+    <mat-card class="stat-card projects-card">
+      <mat-icon class="stat-icon">work</mat-icon>
+      <div class="stat-content">
+        <h2>{{ stats.totalProjects }}</h2>
+        <p>Active Projects</p>
+      </div>
+      <button mat-icon-button (click)="navigateToProjects()" class="stat-action">
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </mat-card>
+
+    <mat-card class="stat-card tasks-card">
+      <mat-icon class="stat-icon">assignment</mat-icon>
+      <div class="stat-content">
+        <h2>{{ stats.totalTasks }}</h2>
+        <p>Total Tasks</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card completion-card">
+      <mat-icon class="stat-icon">check_circle</mat-icon>
+      <div class="stat-content">
+        <h2>{{ getCompletionPercentage() }}%</h2>
+        <p>Completion Rate</p>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Recent Projects Section -->
+  <div *ngIf="!isLoading" class="content-section">
+    <div class="section-header">
+      <h2>Recent Projects</h2>
+      <button mat-button color="primary" (click)="navigateToProjects()">
+        View All
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+
+    <div class="projects-list" *ngIf="recentProjects.length > 0; else noProjects">
+      <mat-card *ngFor="let project of recentProjects" class="project-card" (click)="navigateToProject(project.id)">
+        <mat-card-header>
+          <div mat-card-avatar class="project-avatar" [style.background-color]="getStatusColor(project.status)">
+            <mat-icon>work</mat-icon>
+          </div>
+          <mat-card-title>{{ project.name }}</mat-card-title>
+          <mat-card-subtitle>{{ project.team.name }}</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <p class="project-description">{{ project.description }}</p>
+          
+          <div class="project-meta">
+            <mat-chip-set>
+              <mat-chip [style.background-color]="getStatusColor(project.status)" [style.color]="'white'">
+                {{ getStatusName(project.status) }}
+              </mat-chip>
+              <mat-chip [style.background-color]="getPriorityColor(project.priority)" [style.color]="'white'">
+                {{ getPriorityName(project.priority) }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+
+          <div class="project-progress">
+            <div class="progress-info">
+              <span>Progress</span>
+              <span class="progress-text">{{ project.taskCounts.done }}/{{ project.taskCounts.total }} tasks</span>
+            </div>
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="getProjectProgress(project)"
+              color="primary">
+            </mat-progress-bar>
+          </div>
+
+          <div class="task-summary">
+            <span class="task-badge todo">{{ project.taskCounts.todo }} To Do</span>
+            <span class="task-badge in-progress">{{ project.taskCounts.inProgress }} In Progress</span>
+            <span class="task-badge review">{{ project.taskCounts.review }} Review</span>
+            <span class="task-badge done">{{ project.taskCounts.done }} Done</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <ng-template #noProjects>
+      <div class="empty-state">
+        <mat-icon>work_outline</mat-icon>
+        <h3>No projects yet</h3>
+        <p>Create your first project to get started!</p>
+        <button mat-raised-button color="primary" (click)="navigateToProjects()">
+          Create Project
+        </button>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Quick Actions -->
+  <div *ngIf="!isLoading" class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+      <button mat-raised-button color="primary" (click)="navigateToProjects()">
+        <mat-icon>add</mat-icon>
+        New Project
+      </button>
+      <button mat-raised-button (click)="navigateToTeams()">
+        <mat-icon>group_add</mat-icon>
+        New Team
+      </button>
+    </div>
+  </div>
+</div>

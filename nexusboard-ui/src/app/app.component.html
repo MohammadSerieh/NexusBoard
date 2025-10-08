@@ -1,1 +1,29 @@
+<mat-toolbar color="primary" class="app-toolbar" *ngIf="showNavigation">
+  <span class="logo">
+    <mat-icon>dashboard</mat-icon>
+    NexusBoard
+  </span>
+  <button mat-button routerLink="/dashboard" routerLinkActive="active">
+    <mat-icon>dashboard</mat-icon>
+    Dashboard
+  </button>
+  <button mat-button routerLink="/teams" routerLinkActive="active">
+    <mat-icon>groups</mat-icon>
+    Teams
+  </button>
+  <button mat-button routerLink="/projects" routerLinkActive="active">
+    <mat-icon>work</mat-icon>
+    Projects
+  </button>
+  <span class="spacer"></span>
+  <span *ngIf="currentUser" class="user-info">
+    <mat-icon>account_circle</mat-icon>
+    {{ currentUser.firstName }} {{ currentUser.lastName }}
+  </span>
+  <button mat-button (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    Logout
+  </button>
+</mat-toolbar>
+
 <router-outlet></router-outlet>
