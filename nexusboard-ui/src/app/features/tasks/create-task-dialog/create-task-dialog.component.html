@@ -1,1 +1,78 @@
-<p>create-task-dialog works!</p>
+<h2 mat-dialog-title>Create New Task</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="taskForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Task Title</mat-label>
+      <input matInput formControlName="title" placeholder="Enter task title">
+      <mat-error *ngIf="taskForm.get('title')?.hasError('required')">
+        Task title is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea 
+        matInput 
+        formControlName="description" 
+        placeholder="Describe what needs to be done"
+        rows="3">
+      </textarea>
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          <mat-option [value]="1">Todo</mat-option>
+          <mat-option [value]="2">In Progress</mat-option>
+          <mat-option [value]="3">Review</mat-option>
+          <mat-option [value]="4">Done</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Priority</mat-label>
+        <mat-select formControlName="priority">
+          <mat-option [value]="1">Low</mat-option>
+          <mat-option [value]="2">Medium</mat-option>
+          <mat-option [value]="3">High</mat-option>
+          <mat-option [value]="4">Critical</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Assignee</mat-label>
+        <mat-select formControlName="assigneeId">
+          <mat-option [value]="null">Unassigned</mat-option>
+          <mat-option *ngFor="let member of teamMembers" [value]="member.id">
+            {{ member.firstName }} {{ member.lastName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width" (click)="datepicker.open()">
+        <mat-label>Due Date</mat-label>
+        <input 
+          matInput 
+          [matDatepicker]="datepicker" 
+          formControlName="dueDate">
+        <mat-datepicker-toggle matSuffix [for]="datepicker"></mat-datepicker-toggle>
+        <mat-datepicker #datepicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onCreate()"
+    [disabled]="!taskForm.valid || isLoading">
+    {{ isLoading ? 'Creating...' : 'Create Task' }}
+  </button>
+</mat-dialog-actions>

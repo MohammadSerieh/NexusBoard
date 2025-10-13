@@ -198,6 +198,33 @@ public class TeamService : ITeamService
         }
         await _teamRepository.DeleteTeamAsync(teamId);
     }
+
+    public async Task<List<TeamMemberDto>> GetTeamMembersAsync(Guid teamId)
+    {
+        var team = await _teamRepository.GetTeamByIdAsync(teamId);
+        
+        if (team == null)
+        {
+            throw new InvalidOperationException("Team not found");
+        }
+        
+        return team.Members
+            .Where(m => m.IsActive)
+            .Select(m => new TeamMemberDto
+            {
+                Id = m.User.Id,
+                FirstName = m.User.FirstName,
+                LastName = m.User.LastName,
+                Email = m.User.Email,
+                Role = m.Role.ToString()
+            })
+            .ToList();
+    }
+
+    public async Task<bool> IsUserTeamMemberAsync(Guid userId, Guid teamId)
+    {
+        return await _teamRepository.IsUserInTeamAsync(userId, teamId);
+    }
     
     
 }

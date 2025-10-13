@@ -89,7 +89,29 @@ public class TeamsController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
-        
+
+    }
+    
+    [HttpGet("{teamId}/members")]
+    public async Task<IActionResult> GetTeamMembers(Guid teamId)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            
+            // Verify user is a member of this team
+            if (!await _teamService.IsUserTeamMemberAsync(userId, teamId))
+            {
+                return Forbid("You are not a member of this team");
+            }
+            
+            var members = await _teamService.GetTeamMembersAsync(teamId);
+            return Ok(members);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     private Guid GetCurrentUserId()

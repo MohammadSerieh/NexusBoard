@@ -1,1 +1,89 @@
-<p>kanban-board works!</p>
+<div class="kanban-container">
+  <mat-toolbar class="project-header">
+    <button mat-icon-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="project-info" *ngIf="project">
+      <h2>{{ project.name }}</h2>
+      <span class="team-name">{{ project.team.name }}</span>
+    </span>
+    <span class="spacer"></span>
+    <button mat-raised-button color="primary" (click)="openCreateTaskDialog()">
+      <mat-icon>add</mat-icon>
+      Add Task
+    </button>
+  </mat-toolbar>
+
+  <div class="kanban-board" cdkDropListGroup>
+    <div class="kanban-column" *ngFor="let column of columns">
+      <div class="column-header" [style.border-color]="column.color">
+        <h3 [style.color]="column.color">{{ column.name }}</h3>
+        <span class="task-count">{{ column.items.length }}</span>
+      </div>
+      
+      <div 
+        class="task-list"
+        cdkDropList
+        [cdkDropListData]="column.items"
+        [id]="'list-' + column.id"
+        (cdkDropListDropped)="onTaskDrop($event)">
+        
+        <div 
+          class="task-card"
+          *ngFor="let task of column.items"
+          cdkDrag>
+          
+          <mat-card class="task-item">
+            <mat-card-header>
+              <mat-card-title class="task-title">{{ task.title }}</mat-card-title>
+              <mat-card-subtitle class="task-id">#{{ task.id.substring(0, 8) }}</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <p class="task-description" *ngIf="task.description">
+                {{ task.description | slice:0:100 }}{{ task.description.length > 100 ? '...' : '' }}
+              </p>
+              
+              <div class="task-meta">
+                <mat-chip 
+                  class="priority-chip"
+                  [style.background-color]="getPriorityColor(task.priority)"
+                  [style.color]="'white'">
+                  {{ getPriorityName(task.priority) }}
+                </mat-chip>
+                
+                <div class="task-assignee" *ngIf="task.assignee">
+                  <mat-icon>person</mat-icon>
+                  <span>{{ task.assignee.firstName }} {{ task.assignee.lastName }}</span>
+                </div>
+              </div>
+              
+              <div class="task-footer">
+                <div class="task-dates">
+                  <span class="due-date" *ngIf="task.dueDate" [class.overdue]="isOverdue(task.dueDate)">
+                    <mat-icon>schedule</mat-icon>
+                    {{ formatDate(task.dueDate) }}
+                  </span>
+                </div>
+                
+                <div class="task-actions">
+                  <button mat-icon-button (click)="editTask(task)" class="edit-btn">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="deleteTask(task)" class="delete-btn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        
+        <div class="empty-column" *ngIf="column.items.length === 0">
+          <mat-icon>assignment</mat-icon>
+          <span>No {{ column.name.toLowerCase() }} tasks</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -13,4 +13,6 @@ public interface ITeamRepository
     Task<TeamMember?> GetTeamMemberAsync(Guid teamId, Guid userId);
     Task UpdateTeamMemberAsync(TeamMember teamMember);
     Task DeleteTeamAsync(Guid teamId);
+    Task<bool> IsUserInTeamAsync(Guid userId, Guid teamId);
+    Task<Team?> GetTeamByIdAsync(Guid teamId);
 }

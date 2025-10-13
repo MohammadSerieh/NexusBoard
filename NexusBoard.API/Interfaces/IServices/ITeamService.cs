@@ -9,4 +9,6 @@ public interface ITeamService
     Task<AddMemberResponse> AddTeamMemberAsync(Guid teamId, AddTeamMemberRequest request, Guid userId);
     Task RemoveTeamMemberAsync(Guid teamId, Guid memberId, Guid userId); // No data returned just success/failure
     Task DeleteTeamAsync(Guid teamId, Guid userId);
+    Task<List<TeamMemberDto>> GetTeamMembersAsync(Guid teamId);
+    Task<bool> IsUserTeamMemberAsync(Guid userId, Guid teamId);
 }

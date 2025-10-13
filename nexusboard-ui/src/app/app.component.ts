@@ -14,7 +14,7 @@ import { AuthService, User } from './core/services/auth.service';
   imports: [
     CommonModule,
     RouterOutlet,
-    RouterModule,  // Added this - needed for routerLink and routerLinkActive
+    RouterModule,
     MatToolbarModule,
     MatButtonModule,
     MatIconModule
@@ -52,6 +52,10 @@ export class AppComponent implements OnInit {
     const currentRoute = this.router.url;
     const publicRoutes = ['/login', '/register'];
     this.showNavigation = !publicRoutes.includes(currentRoute) && this.currentUser !== null;
+  }
+
+  navigateToDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
 
   logout(): void {

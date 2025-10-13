@@ -95,7 +95,24 @@ public class TeamRepository : ITeamRepository
 
         // Soft delete the team
         team.IsActive = false;
-        
+
         await _context.SaveChangesAsync();
+    }
+    public async Task<bool> IsUserInTeamAsync(Guid userId, Guid teamId)
+    {
+        return await _context.TeamMembers
+            .AnyAsync(tm => tm.TeamId == teamId &&
+                        tm.UserId == userId &&
+                        tm.IsActive);
+    }
+    
+    public async Task<Team?> GetTeamByIdAsync(Guid teamId)
+    {
+        return await _context.Teams
+            .Where(t => t.Id == teamId && t.IsActive)
+            .Include(t => t.Members.Where(m => m.IsActive))
+                .ThenInclude(m => m.User)
+            .Include(t => t.Creator)
+            .FirstOrDefaultAsync();
     }
 }
