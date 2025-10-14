@@ -8,6 +8,33 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Database FIRST - before anything else
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    // Fallback to configuration
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    Console.WriteLine("Using connection string from appsettings.json");
+}
+else
+{
+    Console.WriteLine("Using DATABASE_URL environment variable");
+    
+    // IMPORTANT: Override the configuration with the environment variable
+    // This ensures Entity Framework uses the right connection string
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = connectionString;
+}
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Database connection string not found!");
+}
+
+Console.WriteLine($"Connection string length: {connectionString.Length}");
+Console.WriteLine($"Connection string format check - contains '@': {connectionString.Contains("@")}");
+Console.WriteLine($"Connection string format check - contains 'postgresql': {connectionString.Contains("postgresql")}");
+
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -43,43 +70,10 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure Database - Read from DATABASE_URL or ConnectionString
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-
-if (string.IsNullOrEmpty(connectionString))
-{
-    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    Console.WriteLine("Using connection string from appsettings.json");
-}
-else
-{
-    Console.WriteLine("Using DATABASE_URL environment variable");
-}
-
-if (string.IsNullOrEmpty(connectionString))
-{
-    throw new InvalidOperationException("Database connection string not found!");
-}
-
-// Debug: Print connection string length and first/last chars
-Console.WriteLine($"Connection string length: {connectionString.Length}");
-Console.WriteLine($"Connection string starts with: {connectionString.Substring(0, Math.Min(20, connectionString.Length))}...");
-Console.WriteLine($"Connection string contains '@': {connectionString.Contains("@")}");
-Console.WriteLine($"Connection string contains 'postgresql': {connectionString.Contains("postgresql")}");
-
-// Log connection info (hide password)
-if (connectionString.Contains("@"))
-{
-    var parts = connectionString.Split('@');
-    Console.WriteLine($"Connecting to database at: @{parts[1]}");
-}
-
+// Configure DbContext - Now it will read from the updated configuration
 builder.Services.AddDbContext<NexusBoardDbContext>(options =>
-{
-    Console.WriteLine("Configuring DbContext with connection string...");
-    options.UseNpgsql(connectionString, b => b.MigrationsAssembly("NexusBoard.API"));
-});
-
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("NexusBoard.API")));
 
 // Configure JWT Authentication
 var jwtSecret = Environment.GetEnvironmentVariable("Jwt__Secret") 
@@ -178,17 +172,21 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<NexusBoardDbContext>();
-        Console.WriteLine("Got DbContext from service provider");
+        Console.WriteLine("Attempting to connect and migrate database...");
         await context.Database.MigrateAsync();
-        Console.WriteLine("Database migration completed successfully!");
+        Console.WriteLine("✅ Database migration completed successfully!");
     }
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Migration failed: {ex.Message}");
-    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    Console.WriteLine($"❌ Migration failed: {ex.Message}");
+    Console.WriteLine($"Exception type: {ex.GetType().Name}");
+    if (ex.InnerException != null)
+    {
+        Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+    }
     throw;
 }
 
-Console.WriteLine("Application starting...");
+Console.WriteLine("🚀 Application starting...");
 app.Run();
