@@ -29,11 +29,14 @@ else
             var uri = new Uri(connectionString);
             var userInfo = uri.UserInfo.Split(':');
             
+            // Use port from URI, or default to 5432 if not specified
+            var port = uri.Port > 0 ? uri.Port : 5432;
+            
             connectionString = $"Host={uri.Host};" +
-                             $"Port={uri.Port};" +
+                             $"Port={port};" +
                              $"Database={uri.AbsolutePath.Trim('/')};" +
                              $"Username={userInfo[0]};" +
-                             $"Password={userInfo[1]};" +
+                             $"Password={Uri.UnescapeDataString(userInfo[1])};" +
                              $"SSL Mode=Require;" +
                              $"Trust Server Certificate=true";
             
