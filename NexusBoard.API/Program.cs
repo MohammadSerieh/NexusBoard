@@ -16,7 +16,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "NexusBoard API", Version = "v1" });
-
+    
     // Add JWT authentication to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -26,7 +26,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-
+    
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -43,33 +43,40 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// --- Database Configuration ---
-string? connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+// Configure Database - Read from DATABASE_URL or ConnectionString
+// Priority: 1. DATABASE_URL env var, 2. ConnectionStrings__DefaultConnection env var, 3. appsettings.json
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-if (!string.IsNullOrEmpty(connectionString))
-{
-    // Convert postgres:// URL to Npgsql connection string
-    connectionString = ConvertDatabaseUrlToNpgsql(connectionString);
-    Console.WriteLine("Using DATABASE_URL environment variable");
-}
-else
+if (string.IsNullOrEmpty(connectionString))
 {
     connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     Console.WriteLine("Using connection string from appsettings.json");
 }
+else
+{
+    Console.WriteLine("Using DATABASE_URL environment variable");
+}
 
 if (string.IsNullOrEmpty(connectionString))
 {
-    throw new InvalidOperationException("Database connection string not found.");
+    throw new InvalidOperationException("Database connection string not found. Set DATABASE_URL environment variable or ConnectionStrings:DefaultConnection in appsettings.json");
+}
+
+// Log connection info (hide password)
+if (connectionString.Contains("@"))
+{
+    var parts = connectionString.Split('@');
+    Console.WriteLine($"Connecting to database at: @{parts[1]}");
 }
 
 builder.Services.AddDbContext<NexusBoardDbContext>(options =>
     options.UseNpgsql(connectionString,
         b => b.MigrationsAssembly("NexusBoard.API")));
 
-// --- JWT Authentication ---
-var jwtSecret = Environment.GetEnvironmentVariable("Jwt__Secret")
-    ?? builder.Configuration["Jwt:Secret"]
+
+// Configure JWT Authentication
+var jwtSecret = Environment.GetEnvironmentVariable("Jwt__Secret") 
+    ?? builder.Configuration["Jwt:Secret"] 
     ?? "your-super-secret-key-that-needs-to-be-at-least-32-characters-long-for-security";
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -102,7 +109,7 @@ builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.ITeamReposito
 builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.IProjectRepository, NexusBoard.API.Repositories.ProjectRepository>();
 builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.IWorkItemRepository, NexusBoard.API.Repositories.WorkItemRepository>();
 
-// Configure CORS
+// Configure CORS - Updated for Production
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
@@ -110,6 +117,7 @@ builder.Services.AddCors(options =>
         {
             if (builder.Environment.IsDevelopment())
             {
+                // Development: Allow local origins
                 policy.WithOrigins("http://localhost:4200", "http://192.168.0.150:4200")
                       .AllowAnyMethod()
                       .AllowAnyHeader()
@@ -117,8 +125,13 @@ builder.Services.AddCors(options =>
             }
             else
             {
+                // Production: Allow Vercel deployment
                 policy.SetIsOriginAllowed(origin =>
-                    origin.Contains("vercel.app") || origin.Contains("localhost"))
+                    {
+                        // Allow any vercel.app domain and localhost for testing
+                        return origin.Contains("vercel.app") || 
+                               origin.Contains("localhost");
+                    })
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
@@ -131,8 +144,20 @@ var app = builder.Build();
 Console.WriteLine($"Environment: {app.Environment.EnvironmentName}");
 
 // Configure the HTTP request pipeline
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
+{
+    // Enable Swagger in production for API testing
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Don't force HTTPS redirect on Render (they handle SSL)
+// app.UseHttpsRedirection();
 
 app.UseCors("AllowAngularApp");
 app.UseAuthentication();
@@ -150,13 +175,3 @@ using (var scope = app.Services.CreateScope())
 
 Console.WriteLine("Application starting...");
 app.Run();
-
-
-// --- Helper Method ---
-static string ConvertDatabaseUrlToNpgsql(string databaseUrl)
-{
-    var uri = new Uri(databaseUrl);
-    var userInfo = uri.UserInfo.Split(':');
-
-    return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
-}
