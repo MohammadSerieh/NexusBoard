@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment';  // Add this line
 
 export interface Project {
   id: string;
@@ -44,7 +44,7 @@ export interface CreateProjectRequest {
   providedIn: 'root'
 })
 export class ProjectsService {
-  private readonly API_URL = environment.apiUrl;
+  private readonly API_URL = environment.apiUrl;  // Change this line
 
   constructor(private http: HttpClient) { }
 
@@ -79,21 +79,21 @@ export class ProjectsService {
 
   getStatusColor(status: number): string {
     const colors = {
-      1: '#2196f3', // Planning - Blue
-      2: '#4caf50', // Active - Green
-      3: '#ff9800', // On Hold - Orange
-      4: '#9c27b0', // Completed - Purple
-      5: '#f44336'  // Cancelled - Red
+      1: '#2196f3',
+      2: '#4caf50',
+      3: '#ff9800',
+      4: '#9c27b0',
+      5: '#f44336'
     };
     return colors[status as keyof typeof colors] || '#666';
   }
 
   getPriorityColor(priority: number): string {
     const colors = {
-      1: '#4caf50', // Low - Green
-      2: '#2196f3', // Medium - Blue
-      3: '#ff9800', // High - Orange
-      4: '#f44336'  // Critical - Red
+      1: '#4caf50',
+      2: '#2196f3',
+      3: '#ff9800',
+      4: '#f44336'
     };
     return colors[priority as keyof typeof colors] || '#666';
   }

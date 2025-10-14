@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment';  // Add this line
 
 export interface WorkItem {
   id: string;
@@ -49,7 +49,7 @@ export interface UpdateWorkItemRequest {
   providedIn: 'root'
 })
 export class WorkItemsService {
-  private readonly API_URL = environment.apiUrl;
+  private readonly API_URL = environment.apiUrl;  // Change this line
 
   constructor(private http: HttpClient) { }
 
@@ -91,10 +91,10 @@ export class WorkItemsService {
 
   getPriorityColor(priority: number): string {
     const colors = {
-      1: '#4caf50', // Low - Green
-      2: '#2196f3', // Medium - Blue
-      3: '#ff9800', // High - Orange
-      4: '#f44336'  // Critical - Red
+      1: '#4caf50',
+      2: '#2196f3',
+      3: '#ff9800',
+      4: '#f44336'
     };
     return colors[priority as keyof typeof colors] || '#666';
   }

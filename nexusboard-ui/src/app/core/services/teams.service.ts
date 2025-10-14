@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-
+import { environment } from '../../../environments/environment';  // Add this line
 
 export interface Team {
   id: string;
@@ -41,7 +40,7 @@ export interface AddMemberRequest {
   providedIn: 'root'
 })
 export class TeamsService {
-  private readonly API_URL = environment.apiUrl;
+  private readonly API_URL = environment.apiUrl;  // Change this line
 
   constructor(private http: HttpClient) { }
 
@@ -61,6 +60,14 @@ export class TeamsService {
     return this.http.delete(`${this.API_URL}/teams/${teamId}/members/${memberId}`);
   }
 
+  deleteTeam(teamId: string): Observable<any> {
+    return this.http.delete(`${this.API_URL}/teams/${teamId}`);
+  }
+
+  getTeamMembers(teamId: string): Observable<TeamMember[]> {
+    return this.http.get<TeamMember[]>(`${this.API_URL}/teams/${teamId}/members`);
+  }
+
   getRoleName(role: string): string {
     if (role === 'TeamLead') {
       return 'Team Lead';
@@ -74,12 +81,4 @@ export class TeamsService {
   isTeamLead(role: string): boolean {
     return role === 'TeamLead';
   }
-
-  deleteTeam(teamId: string): Observable<any> {
-    return this.http.delete(`${this.API_URL}/teams/${teamId}`);
-  }
-  
-  getTeamMembers(teamId: string): Observable<TeamMember[]> {
-    return this.http.get<TeamMember[]>(`${this.API_URL}/teams/${teamId}/members`);
-  }
-} 
+}
