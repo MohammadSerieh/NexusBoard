@@ -43,14 +43,22 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure Database
+// Configure Database - Read from DATABASE_URL or ConnectionString
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Database connection string not found. Set DATABASE_URL environment variable or ConnectionStrings:DefaultConnection in appsettings.json");
+}
+
 builder.Services.AddDbContext<NexusBoardDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
+    options.UseNpgsql(connectionString,
         b => b.MigrationsAssembly("NexusBoard.API")));
 
 
 // Configure JWT Authentication
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "your-super-secret-key-that-needs-to-be-at-least-32-characters-long-for-security";
+var jwtSecret = builder.Configuration["Jwt:Secret"] ?? Environment.GetEnvironmentVariable("Jwt__Secret") ?? "your-super-secret-key-that-needs-to-be-at-least-32-characters-long-for-security";
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -59,9 +67,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "NexusBoard",
+            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? Environment.GetEnvironmentVariable("Jwt__Issuer") ?? "NexusBoard",
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"] ?? "NexusBoard",
+            ValidAudience = builder.Configuration["Jwt:Audience"] ?? Environment.GetEnvironmentVariable("Jwt__Audience") ?? "NexusBoard",
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
