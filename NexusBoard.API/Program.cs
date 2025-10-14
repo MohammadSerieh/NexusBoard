@@ -81,15 +81,34 @@ builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.ITeamReposito
 builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.IProjectRepository, NexusBoard.API.Repositories.ProjectRepository>();
 builder.Services.AddScoped<NexusBoard.API.Interfaces.IRepositories.IWorkItemRepository, NexusBoard.API.Repositories.WorkItemRepository>();
 
-// Configure CORS for Angular app
+// Configure CORS - Updated for Production
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
-        policy => policy
-            .WithOrigins("http://localhost:4200", "http://192.168.0.150:4200")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials());
+        policy =>
+        {
+            if (builder.Environment.IsDevelopment())
+            {
+                // Development: Allow local origins
+                policy.WithOrigins("http://localhost:4200", "http://192.168.0.150:4200")
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials();
+            }
+            else
+            {
+                // Production: Allow Vercel deployment
+                policy.SetIsOriginAllowed(origin =>
+                    {
+                        // Allow any vercel.app domain and localhost for testing
+                        return origin.Contains("vercel.app") || 
+                               origin.Contains("localhost");
+                    })
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            }
+        });
 });
 
 var app = builder.Build();
@@ -100,8 +119,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    // Enable Swagger in production for API testing
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-app.UseHttpsRedirection();
+// Don't force HTTPS redirect on Render (they handle SSL)
+// app.UseHttpsRedirection();
+
 app.UseCors("AllowAngularApp");
 app.UseAuthentication();
 app.UseAuthorization();

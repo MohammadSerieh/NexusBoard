@@ -41,6 +41,7 @@ export interface JwtPayload {
   providedIn: 'root'
 })
 export class AuthService {
+  
   private readonly API_URL = environment.apiUrl;
   private readonly TOKEN_KEY = 'auth_token';
   

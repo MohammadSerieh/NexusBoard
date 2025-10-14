@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: nexusboard-api
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        fromDatabase:
+          name: nexusboard-db
+          property: connectionString
+      - key: Jwt__Secret
+        generateValue: true
+      - key: Jwt__Issuer
+        value: NexusBoard
+      - key: Jwt__Audience
+        value: NexusBoard
+      - key: ASPNETCORE_URLS
+        value: http://+:80
+
+databases:
+  - name: nexusboard-db
+    plan: free
+    databaseName: nexusboard
+    user: nexusboard
