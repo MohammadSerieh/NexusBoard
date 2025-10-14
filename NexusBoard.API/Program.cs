@@ -44,7 +44,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Configure Database - Read from DATABASE_URL or ConnectionString
-// Priority: 1. DATABASE_URL env var, 2. ConnectionStrings__DefaultConnection env var, 3. appsettings.json
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
 
 if (string.IsNullOrEmpty(connectionString))
@@ -59,8 +58,14 @@ else
 
 if (string.IsNullOrEmpty(connectionString))
 {
-    throw new InvalidOperationException("Database connection string not found. Set DATABASE_URL environment variable or ConnectionStrings:DefaultConnection in appsettings.json");
+    throw new InvalidOperationException("Database connection string not found!");
 }
+
+// Debug: Print connection string length and first/last chars
+Console.WriteLine($"Connection string length: {connectionString.Length}");
+Console.WriteLine($"Connection string starts with: {connectionString.Substring(0, Math.Min(20, connectionString.Length))}...");
+Console.WriteLine($"Connection string contains '@': {connectionString.Contains("@")}");
+Console.WriteLine($"Connection string contains 'postgresql': {connectionString.Contains("postgresql")}");
 
 // Log connection info (hide password)
 if (connectionString.Contains("@"))
@@ -70,8 +75,10 @@ if (connectionString.Contains("@"))
 }
 
 builder.Services.AddDbContext<NexusBoardDbContext>(options =>
-    options.UseNpgsql(connectionString,
-        b => b.MigrationsAssembly("NexusBoard.API")));
+{
+    Console.WriteLine("Configuring DbContext with connection string...");
+    options.UseNpgsql(connectionString, b => b.MigrationsAssembly("NexusBoard.API"));
+});
 
 
 // Configure JWT Authentication
@@ -166,11 +173,21 @@ app.MapControllers();
 
 // Auto-migrate database on startup
 Console.WriteLine("Starting database migration...");
-using (var scope = app.Services.CreateScope())
+try
 {
-    var context = scope.ServiceProvider.GetRequiredService<NexusBoardDbContext>();
-    await context.Database.MigrateAsync();
-    Console.WriteLine("Database migration completed successfully!");
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<NexusBoardDbContext>();
+        Console.WriteLine("Got DbContext from service provider");
+        await context.Database.MigrateAsync();
+        Console.WriteLine("Database migration completed successfully!");
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Migration failed: {ex.Message}");
+    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    throw;
 }
 
 Console.WriteLine("Application starting...");
