@@ -44,12 +44,29 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Configure Database - Read from DATABASE_URL or ConnectionString
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
-    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+// Priority: 1. DATABASE_URL env var, 2. ConnectionStrings__DefaultConnection env var, 3. appsettings.json
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    Console.WriteLine("Using connection string from appsettings.json");
+}
+else
+{
+    Console.WriteLine("Using DATABASE_URL environment variable");
+}
 
 if (string.IsNullOrEmpty(connectionString))
 {
     throw new InvalidOperationException("Database connection string not found. Set DATABASE_URL environment variable or ConnectionStrings:DefaultConnection in appsettings.json");
+}
+
+// Log connection info (hide password)
+if (connectionString.Contains("@"))
+{
+    var parts = connectionString.Split('@');
+    Console.WriteLine($"Connecting to database at: @{parts[1]}");
 }
 
 builder.Services.AddDbContext<NexusBoardDbContext>(options =>
@@ -58,7 +75,10 @@ builder.Services.AddDbContext<NexusBoardDbContext>(options =>
 
 
 // Configure JWT Authentication
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? Environment.GetEnvironmentVariable("Jwt__Secret") ?? "your-super-secret-key-that-needs-to-be-at-least-32-characters-long-for-security";
+var jwtSecret = Environment.GetEnvironmentVariable("Jwt__Secret") 
+    ?? builder.Configuration["Jwt:Secret"] 
+    ?? "your-super-secret-key-that-needs-to-be-at-least-32-characters-long-for-security";
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -67,9 +87,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? Environment.GetEnvironmentVariable("Jwt__Issuer") ?? "NexusBoard",
+            ValidIssuer = Environment.GetEnvironmentVariable("Jwt__Issuer") ?? builder.Configuration["Jwt:Issuer"] ?? "NexusBoard",
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"] ?? Environment.GetEnvironmentVariable("Jwt__Audience") ?? "NexusBoard",
+            ValidAudience = Environment.GetEnvironmentVariable("Jwt__Audience") ?? builder.Configuration["Jwt:Audience"] ?? "NexusBoard",
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
@@ -121,6 +141,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+Console.WriteLine($"Environment: {app.Environment.EnvironmentName}");
+
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -143,10 +165,13 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Auto-migrate database on startup
+Console.WriteLine("Starting database migration...");
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<NexusBoardDbContext>();
     await context.Database.MigrateAsync();
+    Console.WriteLine("Database migration completed successfully!");
 }
 
+Console.WriteLine("Application starting...");
 app.Run();
