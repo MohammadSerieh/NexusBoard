@@ -21,6 +21,31 @@ else
 {
     Console.WriteLine("Using DATABASE_URL environment variable");
     
+    // Convert PostgreSQL URL format to Npgsql connection string format
+    if (connectionString.StartsWith("postgres://") || connectionString.StartsWith("postgresql://"))
+    {
+        try
+        {
+            var uri = new Uri(connectionString);
+            var userInfo = uri.UserInfo.Split(':');
+            
+            connectionString = $"Host={uri.Host};" +
+                             $"Port={uri.Port};" +
+                             $"Database={uri.AbsolutePath.Trim('/')};" +
+                             $"Username={userInfo[0]};" +
+                             $"Password={userInfo[1]};" +
+                             $"SSL Mode=Require;" +
+                             $"Trust Server Certificate=true";
+            
+            Console.WriteLine("✅ Converted PostgreSQL URL to Npgsql format");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Failed to parse DATABASE_URL: {ex.Message}");
+            throw;
+        }
+    }
+    
     // IMPORTANT: Override the configuration with the environment variable
     // This ensures Entity Framework uses the right connection string
     builder.Configuration["ConnectionStrings:DefaultConnection"] = connectionString;
@@ -31,9 +56,7 @@ if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("Database connection string not found!");
 }
 
-Console.WriteLine($"Connection string length: {connectionString.Length}");
-Console.WriteLine($"Connection string format check - contains '@': {connectionString.Contains("@")}");
-Console.WriteLine($"Connection string format check - contains 'postgresql': {connectionString.Contains("postgresql")}");
+Console.WriteLine($"Connection string format verified");
 
 // Add services to the container
 builder.Services.AddControllers();
