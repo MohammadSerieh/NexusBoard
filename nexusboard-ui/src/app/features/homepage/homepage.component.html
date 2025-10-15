@@ -1,0 +1,348 @@
+<div class="homepage-container">
+  <!-- Nexus Network Background -->
+  <div class="nexus-background">
+    <!-- Central Nexus Point -->
+    <div class="nexus-point central"></div>
+    
+    <!-- Orbital Nodes -->
+    <div class="nexus-node node-1">
+      <div class="node-dot"></div>
+      <svg class="connection-line line-1" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="0" y1="0" x2="100" y2="100" />
+      </svg>
+    </div>
+    
+    <div class="nexus-node node-2">
+      <div class="node-dot"></div>
+      <svg class="connection-line line-2" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="0" y1="0" x2="100" y2="100" />
+      </svg>
+    </div>
+    
+    <div class="nexus-node node-3">
+      <div class="node-dot"></div>
+      <svg class="connection-line line-3" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="0" y1="0" x2="100" y2="100" />
+      </svg>
+    </div>
+    
+    <div class="nexus-node node-4">
+      <div class="node-dot"></div>
+      <svg class="connection-line line-4" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="0" y1="0" x2="100" y2="100" />
+      </svg>
+    </div>
+    
+    <div class="nexus-node node-5">
+      <div class="node-dot"></div>
+      <svg class="connection-line line-5" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="0" y1="0" x2="100" y2="100" />
+      </svg>
+    </div>
+    
+    <div class="nexus-node node-6">
+      <div class="node-dot"></div>
+      <svg class="connection-line line-6" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="0" y1="0" x2="100" y2="100" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="homepage-nav">
+    <div class="nav-content">
+      <div class="logo">
+        <mat-icon>dashboard</mat-icon>
+        <span>NexusBoard</span>
+      </div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#benefits">Benefits</a>
+      </div>
+      <div class="nav-actions">
+        <button mat-button routerLink="/login">Sign In</button>
+        <button mat-raised-button color="primary" routerLink="/register">Get Started</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        Streamline Your Projects,<br>
+        <span class="gradient-text">Amplify Your Productivity</span>
+      </h1>
+      <p class="hero-subtitle">
+        The all-in-one project management platform that brings teams together.
+        Plan, track, and deliver exceptional work with NexusBoard.
+      </p>
+      <div class="hero-actions">
+        <button mat-raised-button color="primary" class="cta-primary" routerLink="/register">
+          <mat-icon>rocket_launch</mat-icon>
+          Get Started
+        </button>
+        <button mat-stroked-button class="cta-secondary">
+          <mat-icon>play_circle</mat-icon>
+          Watch Demo
+        </button>
+      </div>
+      <p class="hero-note">Free to use • No credit card required</p>
+    </div>
+    
+    <div class="hero-visual">
+      <div class="dashboard-mockup">
+        <mat-icon class="mockup-icon">dashboard</mat-icon>
+        <div class="mockup-content">
+          <div class="mockup-stat">
+            <span class="stat-number">24</span>
+            <span class="stat-label">Active Projects</span>
+          </div>
+          <div class="mockup-stat">
+            <span class="stat-number">156</span>
+            <span class="stat-label">Tasks Completed</span>
+          </div>
+          <div class="mockup-stat">
+            <span class="stat-number">8</span>
+            <span class="stat-label">Team Members</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <div class="section-header">
+      <h2>Everything You Need to Succeed</h2>
+      <p>Powerful features designed for modern teams</p>
+    </div>
+
+    <div class="features-grid">
+      <mat-card class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <mat-icon>dashboard</mat-icon>
+        </div>
+        <h3>Intuitive Dashboards</h3>
+        <p>Get a bird's-eye view of all your projects, tasks, and team performance at a glance.</p>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+          <mat-icon>view_kanban</mat-icon>
+        </div>
+        <h3>Kanban Boards</h3>
+        <p>Visualize your workflow with drag-and-drop kanban boards that make task management effortless.</p>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <h3>Team Collaboration</h3>
+        <p>Bring your team together with real-time updates, comments, and seamless communication.</p>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+          <mat-icon>analytics</mat-icon>
+        </div>
+        <h3>Progress Tracking</h3>
+        <p>Monitor project health with visual analytics and insightful reports that drive decisions.</p>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+          <mat-icon>settings</mat-icon>
+        </div>
+        <h3>Customizable Workflows</h3>
+        <p>Adapt NexusBoard to your team's unique processes with flexible project configurations.</p>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+          <mat-icon>security</mat-icon>
+        </div>
+        <h3>Secure & Reliable</h3>
+        <p>Enterprise-grade security ensures your data is protected with advanced encryption.</p>
+      </mat-card>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-it-works-section">
+    <div class="section-header">
+      <h2>Get Started in Minutes</h2>
+      <p>Three simple steps to transform your workflow</p>
+    </div>
+
+    <div class="steps-container">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-icon">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+        <h3>Create Your Account</h3>
+        <p>Sign up in seconds and set up your workspace with your team's information.</p>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-icon">
+          <mat-icon>group_add</mat-icon>
+        </div>
+        <h3>Invite Your Team</h3>
+        <p>Add team members, create projects, and organize tasks the way you work.</p>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-icon">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <h3>Start Collaborating</h3>
+        <p>Track progress, collaborate in real-time, and deliver exceptional results.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section id="benefits" class="benefits-section">
+    <div class="benefits-content">
+      <div class="benefits-text">
+        <h2>Why Teams Choose NexusBoard</h2>
+        <div class="benefit-item">
+          <mat-icon>check_circle</mat-icon>
+          <div>
+            <h4>Centralized Project Management</h4>
+            <p>Keep all your projects, tasks, and team members organized in one place</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <mat-icon>check_circle</mat-icon>
+          <div>
+            <h4>Visual Task Tracking</h4>
+            <p>Kanban boards provide instant visibility into project progress and bottlenecks</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <mat-icon>check_circle</mat-icon>
+          <div>
+            <h4>Team Collaboration Made Easy</h4>
+            <p>Create teams, assign tasks, and keep everyone aligned on project goals</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <mat-icon>check_circle</mat-icon>
+          <div>
+            <h4>Real-Time Project Insights</h4>
+            <p>Dashboard analytics show completion rates and project health at a glance</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="benefits-visual">
+        <div class="stats-card">
+          <div class="stat-item">
+            <h3>Free</h3>
+            <p>Forever</p>
+          </div>
+          <div class="stat-item">
+            <h3>Open</h3>
+            <p>Source</p>
+          </div>
+          <div class="stat-item">
+            <h3>Simple</h3>
+            <p>To Use</p>
+          </div>
+          <div class="stat-item">
+            <h3>Fast</h3>
+            <p>Setup</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>Ready to Transform Your Workflow?</h2>
+      <p>Start organizing your projects with NexusBoard today.</p>
+      <div class="cta-actions">
+        <button mat-raised-button color="primary" class="cta-large" routerLink="/register">
+          <mat-icon>rocket_launch</mat-icon>
+          Get Started Free
+        </button>
+      </div>
+      <p class="cta-note">Free forever • No credit card required</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="homepage-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <div class="footer-logo">
+          <mat-icon>dashboard</mat-icon>
+          <span>NexusBoard</span>
+        </div>
+        <p>The modern way to manage projects and collaborate with your team.</p>
+      </div>
+
+      <div class="footer-section">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#benefits">Benefits</a>
+      </div>
+
+      <div class="footer-section">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Careers</a>
+        <a href="#">Contact</a>
+        <a href="#">Blog</a>
+      </div>
+
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <a href="#">Documentation</a>
+        <a href="#">Help Center</a>
+        <a href="#">API</a>
+        <a href="#">Community</a>
+      </div>
+
+      <div class="footer-section">
+        <h4>Legal</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Security</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 NexusBoard. All rights reserved.</p>
+      <div class="social-links">
+        <button mat-icon-button>
+          <mat-icon>facebook</mat-icon>
+        </button>
+        <button mat-icon-button>
+          <mat-icon>twitter</mat-icon>
+        </button>
+        <button mat-icon-button>
+          <mat-icon>linkedin</mat-icon>
+        </button>
+        <button mat-icon-button>
+          <mat-icon>instagram</mat-icon>
+        </button>
+      </div>
+    </div>
+  </footer>
+</div>

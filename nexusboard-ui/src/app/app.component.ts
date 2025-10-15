@@ -48,9 +48,9 @@ export class AppComponent implements OnInit {
   }
 
   updateNavigationVisibility(): void {
-    // Hide navigation on login and register pages
+    // Hide navigation on login, register, and homepage
     const currentRoute = this.router.url;
-    const publicRoutes = ['/login', '/register'];
+    const publicRoutes = ['/login', '/register', '/home', '/'];
     this.showNavigation = !publicRoutes.includes(currentRoute) && this.currentUser !== null;
   }
 
@@ -60,6 +60,6 @@ export class AppComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/home']);
   }
 }
