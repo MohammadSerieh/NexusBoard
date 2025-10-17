@@ -1,0 +1,296 @@
+<div class="task-list-container">
+  <mat-toolbar class="project-header">
+    <button mat-icon-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="project-info" *ngIf="project">
+      <h2>{{ project.name }}</h2>
+      <span class="team-name">{{ project.team.name }}</span>
+    </span>
+    <span class="spacer"></span>
+    
+    <!-- View Toggle -->
+    <button mat-button (click)="switchToKanban()" class="view-toggle">
+      <mat-icon>view_kanban</mat-icon>
+      Switch to Kanban
+    </button>
+    
+    <button mat-raised-button color="primary" (click)="openCreateTaskDialog()">
+      <mat-icon>add</mat-icon>
+      Add Task
+    </button>
+  </mat-toolbar>
+
+  <div class="content-wrapper">
+    <!-- Stats Overview -->
+    <div class="stats-section">
+      <mat-card class="stat-card todo-stat">
+        <div class="stat-content">
+          <mat-icon>assignment</mat-icon>
+          <div class="stat-info">
+            <h3>{{ getTasksByStatus(1) }}</h3>
+            <p>Todo</p>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card progress-stat">
+        <div class="stat-content">
+          <mat-icon>pending_actions</mat-icon>
+          <div class="stat-info">
+            <h3>{{ getTasksByStatus(2) }}</h3>
+            <p>In Progress</p>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card review-stat">
+        <div class="stat-content">
+          <mat-icon>rate_review</mat-icon>
+          <div class="stat-info">
+            <h3>{{ getTasksByStatus(3) }}</h3>
+            <p>Review</p>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card done-stat">
+        <div class="stat-content">
+          <mat-icon>check_circle</mat-icon>
+          <div class="stat-info">
+            <h3>{{ getTasksByStatus(4) }}</h3>
+            <p>Done</p>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+      <div class="filter-group">
+        <span class="filter-label">Status:</span>
+        <button 
+          mat-stroked-button 
+          [class.active]="statusFilter === null"
+          (click)="filterByStatus(null)">
+          All
+        </button>
+        <button 
+          mat-stroked-button 
+          [class.active]="statusFilter === 1"
+          (click)="filterByStatus(1)">
+          Todo
+        </button>
+        <button 
+          mat-stroked-button 
+          [class.active]="statusFilter === 2"
+          (click)="filterByStatus(2)">
+          In Progress
+        </button>
+        <button 
+          mat-stroked-button 
+          [class.active]="statusFilter === 3"
+          (click)="filterByStatus(3)">
+          Review
+        </button>
+        <button 
+          mat-stroked-button 
+          [class.active]="statusFilter === 4"
+          (click)="filterByStatus(4)">
+          Done
+        </button>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Priority:</span>
+        <button 
+          mat-stroked-button 
+          [class.active]="priorityFilter === null"
+          (click)="filterByPriority(null)">
+          All
+        </button>
+        <button 
+          mat-stroked-button 
+          [class.active]="priorityFilter === 1"
+          (click)="filterByPriority(1)">
+          Low
+        </button>
+        <button 
+          mat-stroked-button 
+          [class.active]="priorityFilter === 2"
+          (click)="filterByPriority(2)">
+          Medium
+        </button>
+        <button 
+          mat-stroked-button 
+          [class.active]="priorityFilter === 3"
+          (click)="filterByPriority(3)">
+          High
+        </button>
+        <button 
+          mat-stroked-button 
+          [class.active]="priorityFilter === 4"
+          (click)="filterByPriority(4)">
+          Critical
+        </button>
+      </div>
+    </div>
+
+    <!-- Task Table -->
+    <div class="table-container">
+      <table mat-table [dataSource]="filteredTasks" matSort (matSortChange)="sortData($event)" class="tasks-table">
+        
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let task">
+            <button mat-button [matMenuTriggerFor]="statusMenu" class="status-button">
+              <mat-chip 
+                [style.background-color]="getStatusColor(task.status)"
+                [style.color]="'white'">
+                {{ getStatusName(task.status) }}
+              </mat-chip>
+              <mat-icon>arrow_drop_down</mat-icon>
+            </button>
+            <mat-menu #statusMenu="matMenu">
+              <button mat-menu-item (click)="updateTaskStatus(task, 1)">
+                <mat-icon [style.color]="getStatusColor(1)">circle</mat-icon>
+                Todo
+              </button>
+              <button mat-menu-item (click)="updateTaskStatus(task, 2)">
+                <mat-icon [style.color]="getStatusColor(2)">circle</mat-icon>
+                In Progress
+              </button>
+              <button mat-menu-item (click)="updateTaskStatus(task, 3)">
+                <mat-icon [style.color]="getStatusColor(3)">circle</mat-icon>
+                Review
+              </button>
+              <button mat-menu-item (click)="updateTaskStatus(task, 4)">
+                <mat-icon [style.color]="getStatusColor(4)">circle</mat-icon>
+                Done
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <!-- Title Column -->
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Task</th>
+          <td mat-cell *matCellDef="let task" class="task-title-cell">
+            <div class="task-title-wrapper">
+              <h4>{{ task.title }}</h4>
+              <p *ngIf="task.description" class="task-description">
+                {{ task.description | slice:0:80 }}{{ task.description.length > 80 ? '...' : '' }}
+              </p>
+              <div class="task-meta">
+                <span class="task-id">#{{ task.id.substring(0, 8) }}</span>
+                <span class="task-creator">Created by {{ task.creator.firstName }} {{ task.creator.lastName }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Priority Column -->
+        <ng-container matColumnDef="priority">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Priority</th>
+          <td mat-cell *matCellDef="let task">
+            <mat-chip 
+              class="priority-chip"
+              [style.background-color]="getPriorityColor(task.priority)"
+              [style.color]="'white'">
+              {{ getPriorityName(task.priority) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Assignee Column -->
+        <ng-container matColumnDef="assignee">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Assignee</th>
+          <td mat-cell *matCellDef="let task">
+            <div class="assignee-cell" *ngIf="task.assignee">
+              <mat-icon>person</mat-icon>
+              <span>{{ task.assignee.firstName }} {{ task.assignee.lastName }}</span>
+            </div>
+            <span class="unassigned" *ngIf="!task.assignee">
+              <mat-icon>person_outline</mat-icon>
+              Unassigned
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Due Date Column -->
+        <ng-container matColumnDef="dueDate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
+          <td mat-cell *matCellDef="let task">
+            <div *ngIf="task.dueDate" class="due-date-cell">
+              <span 
+                class="due-date"
+                [class.overdue]="isOverdue(task.dueDate)"
+                [class.due-soon]="isDueSoon(task.dueDate)">
+                <mat-icon>schedule</mat-icon>
+                {{ formatDueDate(task.dueDate) }}
+              </span>
+              <span class="overdue-label" *ngIf="isOverdue(task.dueDate)">Overdue</span>
+              <span class="due-soon-label" *ngIf="isDueSoon(task.dueDate)">Due Soon</span>
+            </div>
+            <span class="no-due-date" *ngIf="!task.dueDate">
+              <mat-icon>schedule</mat-icon>
+              No due date
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Created Column -->
+        <ng-container matColumnDef="created">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+          <td mat-cell *matCellDef="let task" class="created-cell">
+            {{ formatDate(task.createdAt) }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let task" class="actions-cell">
+            <button 
+              mat-icon-button 
+              [matMenuTriggerFor]="actionsMenu"
+              matTooltip="More actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionsMenu="matMenu">
+              <button mat-menu-item (click)="editTask(task)">
+                <mat-icon>edit</mat-icon>
+                Edit Task
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="deleteTask(task)" class="delete-action">
+                <mat-icon>delete</mat-icon>
+                Delete Task
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="task-row"></tr>
+      </table>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="filteredTasks.length === 0">
+        <mat-icon>assignment</mat-icon>
+        <h3>No tasks found</h3>
+        <p *ngIf="statusFilter !== null || priorityFilter !== null">
+          Try adjusting your filters or create a new task.
+        </p>
+        <p *ngIf="statusFilter === null && priorityFilter === null">
+          Create your first task to get started!
+        </p>
+        <button mat-raised-button color="primary" (click)="openCreateTaskDialog()">
+          <mat-icon>add</mat-icon>
+          Create Task
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

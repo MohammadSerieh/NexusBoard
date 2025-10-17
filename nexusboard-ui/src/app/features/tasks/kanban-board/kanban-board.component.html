@@ -8,6 +8,13 @@
       <span class="team-name">{{ project.team.name }}</span>
     </span>
     <span class="spacer"></span>
+    
+    <!-- View Toggle -->
+    <button mat-button (click)="switchToListView()" class="view-toggle">
+      <mat-icon>view_list</mat-icon>
+      Switch to List View
+    </button>
+    
     <button mat-raised-button color="primary" (click)="openCreateTaskDialog()">
       <mat-icon>add</mat-icon>
       Add Task

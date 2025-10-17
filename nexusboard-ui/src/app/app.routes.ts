@@ -10,5 +10,6 @@ export const routes: Routes = [
   { path: 'teams', loadComponent: () => import('./features/teams/teams-list/teams-list.component').then(m => m.TeamsListComponent) },
   { path: 'projects', loadComponent: () => import('./features/projects/projects-list/projects-list.component').then(m => m.ProjectsListComponent) },
   { path: 'projects/:id/tasks', loadComponent: () => import('./features/tasks/kanban-board/kanban-board.component').then(m => m.KanbanBoardComponent) },
+  { path: 'projects/:id/tasks-list', loadComponent: () => import('./features/tasks/task-list-view/task-list-view.component').then(m => m.default) },
   { path: '**', redirectTo: '/home' } // Wildcard route for a 404 page (redirect to homepage)
 ];

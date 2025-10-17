@@ -1,0 +1,21 @@
+# Development Dockerfile for .NET API with hot reload
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS development
+
+WORKDIR /src
+
+# Copy all project files from parent context
+COPY . .
+
+# Restore dependencies for the API project
+WORKDIR /src/NexusBoard.API
+RUN dotnet restore
+
+# Install dotnet-ef tool for migrations
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+# Expose port
+EXPOSE 5000
+
+# Run the application with hot reload (watch mode)
+CMD ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:5000", "--no-launch-profile"]

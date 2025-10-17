@@ -149,7 +149,7 @@ export class KanbanBoardComponent implements OnInit {
       width: '600px',
       data: { 
         projectId: this.projectId,
-        teamId: this.project.team.id  // Pass the team ID
+        teamId: this.project.team.id
       }
     });
 
@@ -158,6 +158,10 @@ export class KanbanBoardComponent implements OnInit {
         this.loadTasks();
       }
     });
+  }
+
+  switchToListView(): void {
+    this.router.navigate(['/projects', this.projectId, 'tasks-list']);
   }
 
   getPriorityName(priority: number): string {

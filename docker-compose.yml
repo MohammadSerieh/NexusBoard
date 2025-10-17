@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Local Development)
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexusboard-postgres-dev
+    environment:
+      POSTGRES_DB: nexusboard
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nexusboard-network
+
+  # .NET Backend API (Development with hot reload)
+  backend:
+    build:
+      context: .
+      dockerfile: NexusBoard.API/Dockerfile.dev
+    container_name: nexusboard-backend-dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=nexusboard;Username=postgres;Password=postgres123
+      - JWT__Secret=your-super-secret-jwt-key-minimum-32-characters-long
+      - JWT__Issuer=NexusBoard
+      - JWT__Audience=NexusBoardUsers
+    ports:
+      - "5001:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./NexusBoard.API:/src/NexusBoard.API
+      - ./NexusBoard.Core:/src/NexusBoard.Core
+      - ./NexusBoard.Infrastructure:/src/NexusBoard.Infrastructure
+      - /src/NexusBoard.API/bin
+      - /src/NexusBoard.API/obj
+    networks:
+      - nexusboard-network
+
+  # Angular Frontend (Development with hot reload)
+  frontend:
+    build:
+      context: ./nexusboard-ui
+      dockerfile: Dockerfile.dev
+    container_name: nexusboard-frontend-dev
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./nexusboard-ui:/app
+      - /app/node_modules
+      - /app/.angular
+    depends_on:
+      - backend
+    networks:
+      - nexusboard-network
+
+networks:
+  nexusboard-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

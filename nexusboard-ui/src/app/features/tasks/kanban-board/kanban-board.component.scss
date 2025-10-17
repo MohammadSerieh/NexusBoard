@@ -36,6 +36,16 @@
     }
   }
 
+  .view-toggle {
+    margin-right: 12px;
+    border-radius: 8px;
+    font-weight: 500;
+
+    mat-icon {
+      margin-right: 4px;
+    }
+  }
+
   button[color="primary"] {
     border-radius: 12px;
     font-weight: 500;
@@ -338,6 +348,10 @@
 
     .project-info h2 {
       font-size: 16px;
+    }
+
+    .view-toggle {
+      display: none; // Hide on mobile for space
     }
   }
 }
